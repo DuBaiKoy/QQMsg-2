@@ -1,0 +1,209 @@
+
+//6：是 7：否 2:取消
+//功能1变量
+Dim 数据 = []
+Dim 分组 = []
+Dim 偏移Y = 32
+Dim 旧分组 = ""
+Dim rowNum1 = ""
+Dim path1 = ""
+dim iRet = ""
+Dim isOK = ""
+Dim saveNum = ""
+
+//功能2变量
+Dim rowNum2 = ""
+Dim path2 = ""
+Dim qq = ""
+Dim objExcel
+objWindow = PrintToScreen.CreateWindow({"height":89,"resolution":{"height":1080,"width":1920},"width":472,"x":685,"y":91},true)
+    
+
+Function 保存QQ好友信息(path1)
+    iRet = Dialog.MsgBox("为避免出现不必要的错误，本程序执行前会将所有的Excel关闭，请保存已打开的Excel以免数据丢失，保存关闭后再点击确认按钮，谢谢。","重要提示！！！","0",3,0)
+    PrintToScreen.DrawText(objWindow,"UiBot正在自动执行中...",35,[255,0,0])
+    App.Kill("Excel.exe")
+    objExcel = Excel.OpenExcel(path1,true,"Excel","","")
+    Excel.ClearRange(objExcel,0,"A1:E2000")
+    Excel.SetColumnWidth(objExcel,"Sheet1","A:C",30,false)
+    //激活chrome浏览器
+    #icon("@res:aoi6gk4o-qgcs-rfkt-lob2-9ilddsobtq8c.png")
+    Window.SetActive({"wnd":[{"cls":"Chrome_WidgetWin_1","app":"chrome"}]})
+    #icon("@res:default.png")
+    Window.Show({"wnd":[{"cls":"Chrome_WidgetWin_1","app":"chrome"}]},"max")
+    //点击通讯录
+    Mouse.Action({"wnd":[{"cls":"Chrome_WidgetWin_1","title":"*","app":"chrome"},{"cls":"Chrome_RenderWidgetHostHWND","title":"Chrome Legacy Window"}],"html":[{"tag":"A","parentid":"navBarTd","aaname":"通讯录"}]},"left","click",10000,{"bContinueOnError":false,"iDelayAfter":300,"iDelayBefore":200,"bSetForeground":true,"sCursorPosition":"Center","iCursorOffsetX":0,"iCursorOffsetY":0,"sKeyModifiers":[],"sSimulate":"simulate"})
+    saveNum = 0
+    TracePrint "saveNum:"&CStr(saveNum)
+    //保存数据
+    For x=0 To 20 step 1
+        #icon("@res:dhrk7umj-t17n-7o30-n12g-74t5s2ijufn0.png")
+        旧分组 = UiElement.GetValue({"wnd":[{"cls":"Chrome_WidgetWin_1","title":"*","app":"chrome"},{"cls":"Chrome_RenderWidgetHostHWND","title":"Chrome Legacy Window"}],"html":[{"tag":"IFRAME","id":"mainFrame"},{"tag":"H2"}]},{"bContinueOnError":false,"iDelayAfter":300,"iDelayBefore":200})
+        TracePrint 旧分组
+        #icon("@res:acle0hre-9lck-qsql-oaj5-id0ag9888ca3.png")
+        Mouse.Action({"wnd":[{"cls":"Chrome_WidgetWin_1","title":"*","app":"chrome"},{"cls":"Chrome_RenderWidgetHostHWND","title":"Chrome Legacy Window"}],"html":[{"tag":"IFRAME","id":"mainFrame"},{"tag":"H4"}]},"left","click",10000,{"bContinueOnError":false,"iDelayAfter":300,"iDelayBefore":200,"bSetForeground":true,"sCursorPosition":"Center","iCursorOffsetX":0,"iCursorOffsetY":偏移Y,"sKeyModifiers":[],"sSimulate":"simulate"})
+        Delay(800)
+        #icon("@res:h8e18a5c-s6hh-99g9-kfm0-s9jf832a4p50.png")
+        分组[x]= UiElement.GetValue({"wnd":[{"cls":"Chrome_WidgetWin_1","title":"*","app":"chrome"},{"cls":"Chrome_RenderWidgetHostHWND","title":"Chrome Legacy Window"}],"html":[{"tag":"IFRAME","id":"mainFrame"},{"tag":"H2"}]},{"bContinueOnError":false,"iDelayAfter":300,"iDelayBefore":200})
+        TracePrint 分组[x]
+        数据[x]= UiElement.DataScrap({"html":[{"id":"mainFrame","tag":"IFRAME"},{"id":"list","tag":"DIV"}],"wnd":[{"app":"chrome","cls":"Chrome_WidgetWin_1","title":"*"},{"cls":"Chrome_RenderWidgetHostHWND","title":"Chrome Legacy Window"}]},{"Columns":[{"props":["text"],"selecors":[{"className":"","index":0,"prefix":"","tag":"ul","value":"ul"},{"className":"","index":0,"prefix":">","tag":"div","value":"div"},{"index":0,"prefix":">","tag":"li","value":"li"},{"className":"name tf","index":0,"prefix":">","tag":"span","value":"span.name.tf"}]},{"props":["text"],"selecors":[{"className":"","index":0,"prefix":"","tag":"ul","value":"ul"},{"className":"","index":0,"prefix":">","tag":"div","value":"div"},{"index":0,"prefix":">","tag":"li","value":"li"},{"className":"email tf","index":0,"prefix":">","tag":"span","value":"span.email.tf"}]}],"ExtractTable":0},{"objNextLinkElement":"","iMaxNumberOfPage":5,"iMaxNumberOfResult":-1,"iDelayBetweenMS":1000,"bContinueOnError":false})
+        
+        If 旧分组 = 分组[x]
+            Break
+        End If
+        rowNum1 =Excel.GetRowsCount(objExcel,"Sheet1")
+        TracePrint rowNum1
+        Excel.WriteColumn(objExcel,"Sheet1","A"&rowNum1+1,分组[x],false)
+        Excel.WriteRange(objExcel,"Sheet1","B"&rowNum1+1,数据[x],false)
+        saveNum = saveNum + UBound(数据[x])
+        Dialog.Notify("已保存【"&分组[x]&"】分组下的所有好友...", "UiBot", "0")
+        TracePrint "saveNum:"&CStr(saveNum)
+        偏移Y = 偏移Y + 25
+    Next
+    Excel.Save(objExcel)
+    Excel.ActiveBook(objExcel)
+    PrintToScreen.CleanText(objWindow)
+    iRet = Dialog.MsgBox("本次QQ好友信息保存完毕，共保存了【"&saveNum&"】个好友的信息。\n欢迎下次使用，谢谢！！！","UiBot","0","1",0)
+    //Delay(10000)
+    //Excel.CloseExcel(objExcel)
+    Exit
+End Function
+
+
+Function QQ群发消息(path2)
+    iRet = Dialog.MsgBox("为避免出现不必要的错误，本程序执行前会将所有的Excel关闭，请保存已打开的Excel以免数据丢失，保存关闭后再点击确认按钮，谢谢。","重要提示！！！","0",3,0)
+    PrintToScreen.DrawText(objWindow,"UiBot正在自动执行中...",35,[255,0,0])
+    App.Kill("Excel.exe")
+    //打开Excel并读取数据
+    objExcelWorkBook = Excel.OpenExcel(path2,true,"Excel","","")
+    rowNum2 = Excel.GetRowsCount(objExcelWorkBook,"Sheet1")
+    msgData = Excel.ReadRange(objExcelWorkBook,"Sheet1","A1:C"&rowNum2)
+    //开始群发
+    For i=1 To UBound(msgData)
+        qqq = Split(msgData[i][1],"@")
+        qq = qqq[0]
+
+        #icon("@res:l77rbgvl-omkd-j2t1-7k12-ubn1ele3c75o.png")
+        Window.TopMost({"wnd":[{"cls":"TXGuiFoundation","title":"*个会话","app":"QQ"}]},true)
+        #icon("@res:rt9r3a0k-uhm2-5b60-ehjb-ohb0he2o5in4.png")
+        Mouse.Action({"wnd":[{"app":"QQ","cls":"TXGuiFoundation","title":"*个会话"}],"ctrl":[{"role":"ROLE_SYSTEM_PANE","idx":7}]},"left","click",10000,{"bContinueOnError":false,"iDelayAfter":300,"iDelayBefore":200,"bSetForeground":true,"sCursorPosition":"Center","iCursorOffsetX":0,"iCursorOffsetY":0,"sKeyModifiers":[],"sSimulate":"simulate"})
+        Keyboard.Input(qq,{"iDelayAfter":300,"iDelayBefore":200,"sSimulate":"message"})
+        Keyboard.Press("Enter", "press", [],{"iDelayAfter":300,"iDelayBefore":200,"sSimulate":"simulate"})
+        #icon("@res:27tl8o4n-scu4-d989-mcud-thngs13i4lsv.png")
+        myBox = UiElement.Exists({"wnd":[{"app":"QQ","cls":"TX*","title":"消息漫游安全验证"}]},{"bContinueOnError":false,"iDelayAfter":300,"iDelayBefore":200})
+        if myBox
+            Delay(3000)
+            #icon("@res:05iul086-ahnp-oqvu-cs7v-f716t2cjipl3.png")
+            Mouse.Action({"wnd":[{"app":"QQ","cls":"TXGuiFoundation","title":"消息漫游安全验证"}],"ctrl":[{"role":"ROLE_SYSTEM_PUSHBUTTON","idx":15}]},"left","click",10000,{"bContinueOnError":false,"iDelayAfter":300,"iDelayBefore":200,"bSetForeground":true,"sCursorPosition":"Center","iCursorOffsetX":0,"iCursorOffsetY":0,"sKeyModifiers":[],"sSimulate":"simulate"})
+        end if
+        Delay(200)
+        Keyboard.Input(msgData[i][2],{"iDelayAfter":200,"iDelayBefore":200,"sSimulate":"message"})
+
+        Delay(200)
+        Keyboard.Press("Enter", "press", [],{"iDelayAfter":300,"iDelayBefore":200,"sSimulate":"simulate"})
+        Delay(200)
+        #icon("@res:l77rbgvl-omkd-j2t1-7k12-ubn1ele3c75o.png")
+        Window.TopMost({"wnd":[{"cls":"TXGuiFoundation","title":"*个会话","app":"QQ"}]},false)
+    Next
+    PrintToScreen.CleanText(objWindow)
+    iRet = Dialog.MsgBox("本次群发已完成，共群发【"&UBound(msgData)&"】条消息！！！\n欢迎您下次使用，谢谢！！！","UiBot","0","1",0)
+    Exit
+
+    //Delay(5000)
+    //Excel.CloseExcel(objExcelWorkBook)
+End Function
+
+iRet = Dialog.MsgBox('''欢迎您！！！
+运行本程序的要求如下：
+
+1.  操作系统为Windows7及以上。
+
+2.  分辨率为1920*1080,系统缩放为100%。
+
+3.  安装不低于2019年版本的QQ。
+
+4.  安装Excel2007及以上版本。
+
+5.  安装谷歌浏览器并正确安装UiBot扩展。
+
+请检查您是否满足条件。''',"保存QQ好友信息和QQ群发机器人",1,2,0)
+TracePrint iret
+If iret = 7
+
+    iRet = Dialog.MsgBox("您不满足运行条件，执行可能会发生不可预估的错误，\n\n欢迎您满足条件后再次使用，谢谢！！！","Bye","0","1",0)
+    
+Elseif iret = 6
+    
+    sRet = Dialog.InputBox('''请您输入代码以选择功能：
+
+输入代码"1"，启动保存QQ好友信息机器人；
+
+输入代码"2"，启动QQ群发机器人。''',"保存QQ好友信息和QQ群发机器人","",true)
+
+    Delay(500)
+    TracePrint sret
+    If sRet = "1"
+
+        iRet = Dialog.MsgBox("一、请您在谷歌浏览器中登录QQ邮箱并设置字体为【标准】\n\n二、在接下来的文件选择对话框中选择或创建您要保存到的表格文件。\n","保存QQ信息机器人","0","1",0)
+        isOK = false
+        Do While isOK = false
+            path1 = Dialog.OpenFile("C:\\Users\\user\\Desktop","表格文件|*.xls;*.xlsx","请选择要将QQ好友信息保存到的表格文件：")
+            If path1 = ""
+                isOK = false
+                iRet = Dialog.MsgBox("必须要选择保存位置哦！！！\n\n如果您想退出程序请点击“是”,否则请点击“否”以继续选择文件。","提示",1,"1",0)
+                If iret = 7
+                    Continue
+                Elseif iret = 6
+                    iRet = Dialog.MsgBox("欢迎您下次使用，谢谢！！！","Bye","0","1",0)
+                    Exit()
+                End If
+            Else
+                isOK = true
+            End If
+            TracePrint path1
+            TracePrint isOK
+            保存QQ好友信息(path1)
+        Loop
+
+    elseif sRet = "2"
+
+        iRet = Dialog.MsgBox('''一、请您创建一个群发信息的Excel，格式为：
+                        A	             B		            C
+    1(表头)       好友名字      好友QQ号或邮箱号      发送内容
+    2(例)         ABC(任意)      12334556@qq.com     XXXXXX
+
+二、请您打开QQ消息管理器（任意一个QQ会话窗口）；
+
+三、请在接下来弹出的文件选择框中选择您已创建的Excel表格。
+
+    ''',"QQ群发机器人","0","1",0)
+        
+        
+        isOK = false
+        Do While isOK = false
+            path2 = Dialog.OpenFile("C:\\Users\\user\\Desktop","表格文件|*.xls;*.xlsx","请选择要群发的好友信息：")
+            If path2 = ""
+                isOK = false
+                iRet = Dialog.MsgBox("必须要选择文件位置哦！！！\n\n如果您想退出程序请点击“是”,否则请点击“否”以继续选择文件。","提示",1,"1",0)
+                If iret = 7
+                    Continue
+                Elseif iret = 6
+                    iRet = Dialog.MsgBox("欢迎您下次使用，谢谢！！！","Bye","0","1",0)
+                    Exit()
+                End If
+            Else
+                isOK = true
+            End If
+            TracePrint path2
+            TracePrint isOK
+            QQ群发消息(path2)
+        Loop
+
+    Else
+        iRet = Dialog.MsgBox("输入有误，欢迎您下次使用，谢谢！！！","Bye","0","1",0)
+        exit
+    End If
+
+End If
+
+

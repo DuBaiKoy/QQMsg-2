@@ -1,0 +1,5 @@
+dim arrRet = ""
+
+arrRet = Split("132@qq.com","@")
+
+TracePrint arrret

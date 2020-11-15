@@ -1,0 +1,64 @@
+Dim rowNum2 = ""
+Dim path2 = ""
+
+Function QQ群发消息(path2)
+    iRet = Dialog.MsgBox("为避免出现不必要的错误，本程序执行前会将所有的Excel关闭，请保存已打开的Excel以免数据丢失，保存关闭后再点击确认按钮，谢谢。","重要提示！！！","0",3,0)
+    App.Kill("Excel.exe")
+    //打开Excel并读取数据
+    objExcelWorkBook = Excel.OpenExcel(path2,true,"Excel","","")
+    rowNum2 = Excel.GetRowsCount(objExcelWorkBook,"Sheet1")
+    msgData = Excel.ReadRange(objExcelWorkBook,"Sheet1","A1:C"&rowNum2)
+    //开始群发
+    For i=1 To UBound(msgData)
+        qq = SubStr(msgData[i][1],1,6)
+        TracePrint qq
+
+        #icon("@res:l77rbgvl-omkd-j2t1-7k12-ubn1ele3c75o.png")
+        Window.TopMost({"wnd":[{"cls":"TXGuiFoundation","title":"*个会话","app":"QQ"}]},true)
+        #icon("@res:rt9r3a0k-uhm2-5b60-ehjb-ohb0he2o5in4.png")
+        Mouse.Action({"wnd":[{"app":"QQ","cls":"TXGuiFoundation","title":"*个会话"}],"ctrl":[{"role":"ROLE_SYSTEM_PANE","idx":7}]},"left","click",10000,{"bContinueOnError":false,"iDelayAfter":300,"iDelayBefore":200,"bSetForeground":true,"sCursorPosition":"Center","iCursorOffsetX":0,"iCursorOffsetY":0,"sKeyModifiers":[],"sSimulate":"simulate"})
+        Keyboard.Input(qq,{"iDelayAfter":300,"iDelayBefore":200,"sSimulate":"message"})
+        Keyboard.Press("Enter", "press", [],{"iDelayAfter":300,"iDelayBefore":200,"sSimulate":"simulate"})
+        #icon("@res:27tl8o4n-scu4-d989-mcud-thngs13i4lsv.png")
+        myBox = UiElement.Exists({"wnd":[{"app":"QQ","cls":"TX*","title":"消息漫游安全验证"}]},{"bContinueOnError":false,"iDelayAfter":300,"iDelayBefore":200})
+        if myBox
+            Delay(3000)
+            #icon("@res:05iul086-ahnp-oqvu-cs7v-f716t2cjipl3.png")
+            Mouse.Action({"wnd":[{"app":"QQ","cls":"TXGuiFoundation","title":"消息漫游安全验证"}],"ctrl":[{"role":"ROLE_SYSTEM_PUSHBUTTON","idx":15}]},"left","click",10000,{"bContinueOnError":false,"iDelayAfter":300,"iDelayBefore":200,"bSetForeground":true,"sCursorPosition":"Center","iCursorOffsetX":0,"iCursorOffsetY":0,"sKeyModifiers":[],"sSimulate":"simulate"})
+        end if
+        Delay(500)
+        #icon("@res:hc6a9ppg-30s3-fgg7-foat-lsbap4206lc6.png")
+        Keyboard.InputText({"wnd":[{"app":"QQ","cls":"TXGuiFoundation","title":"*个会话"}],"ctrl":[{"role":"ROLE_SYSTEM_TEXT","name":"输入","idx":2}]},msgData[i][2],true,20,10000,{"bContinueOnError":false,"iDelayAfter":300,"iDelayBefore":500,"sKeyModifiers":[],"sSimulate":"message","bValidate":false,"bClickBeforeInput":false})
+        Delay(500)
+        Keyboard.Press("Enter", "press", [],{"iDelayAfter":300,"iDelayBefore":200,"sSimulate":"simulate"})
+        Delay(500)
+        #icon("@res:l77rbgvl-omkd-j2t1-7k12-ubn1ele3c75o.png")
+        Window.TopMost({"wnd":[{"cls":"TXGuiFoundation","title":"*个会话","app":"QQ"}]},false)
+    Next
+    iRet = Dialog.MsgBox("本次群发已完成，共群发【"&UBound(msgData)&"】条消息！！！\n欢迎您下次使用，谢谢，再见！！！","UiBot","0","1",0)
+    Exit
+
+    //Delay(5000)
+    //Excel.CloseExcel(objExcelWorkBook)
+End Function
+
+    iRet = Dialog.MsgBox("1.  操作系统为【Windows7】及以上。\n2.  分辨率为【1920*1080】,系统缩放为【100%】。\n3.  安装不低于2019年版本的QQ。\n5.  安装【Excel2007】及以上版本。\n6. 打开消息管理器（任意一个会话窗口）\n","QQ群发机器人要求::","0","1",0)
+    isOK = false
+    Do While isOK = false
+        path2 = Dialog.OpenFile("C:\\Users\\user\\Desktop","表格文件|*.xls;*.xlsx","请选择要群发的好友信息：")
+        If path2 = ""
+            isOK = false
+            iRet = Dialog.MsgBox("必须要选择文件位置哦！！！\n如果您想退出程序请点击“是”,否则请点击“否”以继续选择文件。","提示",1,"1",0)
+            If iret = 7
+                Continue
+            Elseif iret = 6
+                iRet = Dialog.MsgBox("欢迎您下次使用，谢谢！！！","Bye","0","1",0)
+                Exit()
+            End If
+        Else
+            isOK = true
+        End If
+        TracePrint path2
+        TracePrint isOK
+        QQ群发消息(path2)
+    Loop
